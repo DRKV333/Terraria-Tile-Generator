@@ -1,6 +1,5 @@
 import random
 import PIL.Image
-import numpy as np
 import os
 from tkinter import *
 from tkinter.colorchooser import *
@@ -29,27 +28,25 @@ if not os.path.exists("Blocks"):
 
 def MakeTile(shadesNum, colors):
     print("\nStarted!")
-    template = np.asarray(PIL.Image.open(resource_path(textype.get())).convert("RGBA"))
-    template.setflags(write=1)
-    print(template.flags)
+    tamplateImg = PIL.Image.open(resource_path(textype.get())).convert("RGBA")
+    template = tamplateImg.load()
 
     for x in range(shadesNum):
-        darkShade = [x - 10 if x >= 10 else x for x in colors[-1]]
-        lightShade = [x + 10 if x <= 245 else x for x in colors[0]]
+        darkShade = tuple(x - 10 if x >= 10 else x for x in colors[-1])
+        lightShade = tuple(x + 10 if x <= 245 else x for x in colors[0])
         colors = [lightShade] + colors + [darkShade]
 
-    for row in range(0, len(template), 2):
-        for pixel in range(0, len(template[row]), 2):
-            if template[row][pixel][1] == 255:
+    for row in range(0, tamplateImg.width, 2):
+        for pixel in range(0, tamplateImg.height, 2):
+            if template[row, pixel][1] == 255:
                 randomColor = colors[random.randint(0, len(colors) - 1)]
-                template[row][pixel] = randomColor
-                template[row + 1][pixel] = randomColor
-                template[row][pixel + 1] = randomColor
-                template[row + 1][pixel + 1] = randomColor
+                template[row, pixel] = randomColor
+                template[row + 1, pixel] = randomColor
+                template[row, pixel + 1] = randomColor
+                template[row + 1, pixel + 1] = randomColor
     print("Created image!")
 
-    template = PIL.Image.fromarray(np.asarray(template).astype('uint8'))
-    template.save('Blocks\\' + texn.get() + '.png')
+    tamplateImg.save('Blocks\\' + texn.get() + '.png')
     print("Saved image!")
     print("Done!")
 
@@ -58,7 +55,7 @@ def getColor():
     colorButton.configure(bg=color[1])
     hexcolor = color[1][1:]
     global colors
-    colors = [[int(hexcolor[0] + hexcolor[1], 16), int(hexcolor[2] + hexcolor[3], 16), int(hexcolor[4] + hexcolor[5], 16), 255]]
+    colors = [(int(hexcolor[0] + hexcolor[1], 16), int(hexcolor[2] + hexcolor[3], 16), int(hexcolor[4] + hexcolor[5], 16), 255)]
 
 Label(root, text="Terraria Tile Generator", font='Helvetica 18 bold').grid(row=0, column=0, padx=10, pady=10, columnspan=2)
 Label(root, text="Number of lighter and darker shades:").grid(column=0, row=1, padx=10, pady=10)
